@@ -43,6 +43,35 @@ def stats(message):
     lines.append(f"Всего: {total}")
     bot.reply_to(message, "\n".join(lines))
 
+@bot.message_handler(commands=["myid"])
+def myid(message):
+    bot.reply_to(message, f"Твой ID: {message.from_user.id}")
+
+@bot.message_handler(commands=["partner"])
+def partner(message):
+    parts = message.text.split()
+    if len(parts) != 2 or not parts[1].isdigit():
+        bot.reply_to(message, "Напиши так: /partner ID, например: /partner 123456789")
+        return
+
+    db.set_partner(message.from_user.id, int(parts[1]))
+    bot.reply_to(message, "Партнёр сохранён")
+
+
+@bot.message_handler(commands=["share"])
+def share(message):
+    parts = message.text.split()
+    if len(parts) != 2 or parts[1] not in ("on", "off"):
+        bot.reply_to(message, "Напиши так: /share on или /share off")
+        return
+
+    if parts[1] == "on":
+        db.set_share(message.from_user.id, 1)
+        bot.reply_to(message, "Партнёр теперь видит твои расходы")
+    else:
+        db.set_share(message.from_user.id, 0)
+        bot.reply_to(message, "Партнёр больше не видит твои расходы")
+
 @bot.message_handler(content_types=["text"])
 def add_expense(message):
     parts = message.text.split()
