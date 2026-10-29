@@ -28,6 +28,21 @@ def list_expenses(message):
         lines.append(f"{row[0]} — {row[1]}")
     bot.reply_to(message, "\n".join(lines))
 
+@bot.message_handler(commands=["stats"])
+def stats(message):
+    rows = db.get_totals_by_category(message.from_user.id)
+    if len(rows) == 0:
+        bot.reply_to(message, "Пока нет расходов")
+        return
+
+    total = 0
+    lines = []
+    for row in rows:
+        lines.append(f"{row[0]}: {row[1]}")
+        total = total + row[1]
+    lines.append(f"Всего: {total}")
+    bot.reply_to(message, "\n".join(lines))
+
 @bot.message_handler(content_types=["text"])
 def add_expense(message):
     parts = message.text.split()
@@ -45,6 +60,6 @@ def add_expense(message):
     category = categories.detect_category(title)
     db.add_expense(message.from_user.id, title, amount, category)
     bot.reply_to(message, f"Записал: {title}, сумма {amount}, категория: {category}")
-    
+
 print("Бот запущен")
 bot.infinity_polling()

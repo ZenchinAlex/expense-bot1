@@ -43,3 +43,15 @@ def get_last_expenses(user_id, limit=10):
     rows = cursor.fetchall()
     connection.close()
     return rows
+
+def get_totals_by_category(user_id):
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT category, SUM(amount) FROM expenses "
+        "WHERE user_id = ? GROUP BY category ORDER BY SUM(amount) DESC",
+        (user_id,),
+    )
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
