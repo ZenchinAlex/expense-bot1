@@ -85,3 +85,27 @@ def set_share(user_id, share):
     )
     connection.commit()
     connection.close()
+
+def get_visible_partner_id(user_id):
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT partner_id FROM partners WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    if row is None or row[0] is None:
+        connection.close()
+        return None
+    partner_id = row[0]
+
+    cursor.execute(
+        "SELECT partner_id, share FROM partners WHERE user_id = ?",
+        (partner_id,),
+    )
+    partner_row = cursor.fetchone()
+    connection.close()
+
+    if partner_row is None:
+        return None
+    if partner_row[0] == user_id and partner_row[1] == 1:
+        return partner_id
+    return None
