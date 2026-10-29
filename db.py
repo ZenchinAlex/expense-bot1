@@ -29,3 +29,15 @@ def add_expense(user_id, title, amount):
     )
     connection.commit()
     connection.close()
+
+def get_last_expenses(user_id, limit=10):
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT title, amount, created_at FROM expenses "
+        "WHERE user_id = ? ORDER BY id DESC LIMIT ?",
+        (user_id, limit),
+    )
+    rows = cursor.fetchall()
+    connection.close()
+    return rows

@@ -16,6 +16,17 @@ bot = telebot.TeleBot(TOKEN)
 def start(message):
     bot.reply_to(message, "Привет! Я бот для учёта расходов.")
 
+@bot.message_handler(commands=["list"])
+def list_expenses(message):
+    rows = db.get_last_expenses(message.from_user.id)
+    if len(rows) == 0:
+        bot.reply_to(message, "Пока нет расходов")
+        return
+
+    lines = []
+    for row in rows:
+        lines.append(f"{row[0]} — {row[1]}")
+    bot.reply_to(message, "\n".join(lines))
 
 @bot.message_handler(content_types=["text"])
 def add_expense(message):
