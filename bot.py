@@ -3,7 +3,7 @@ import os
 import telebot
 from dotenv import load_dotenv
 import db
-
+import categories
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
@@ -42,8 +42,9 @@ def add_expense(message):
         return
 
     title = " ".join(parts[:-1])
-    db.add_expense(message.from_user.id, title, amount)
-    bot.reply_to(message, f"Записал: {title}, сумма {amount}")
-
+    category = categories.detect_category(title)
+    db.add_expense(message.from_user.id, title, amount, category)
+    bot.reply_to(message, f"Записал: {title}, сумма {amount}, категория: {category}")
+    
 print("Бот запущен")
 bot.infinity_polling()
