@@ -96,6 +96,24 @@ def family(message):
     lines.append(f"Всего: {total}")
     bot.reply_to(message, "\n".join(lines))
 
+@bot.message_handler(commands=["total"])
+def total(message):
+    partner_id = db.get_visible_partner_id(message.from_user.id)
+    if partner_id is None:
+        bot.reply_to(message, "Нет доступа: партнёр не указан, не включил /share on или не добавил тебя как партнёра")
+        return                      
+    rows = db.get_totals_for_two(message.from_user.id, partner_id)   
+    if len(rows) == 0: 
+        bot.reply_to(message, "Расходов нет") 
+        return
+    lines = ["Общие расходы:"]
+    grand_total = 0
+    for row in rows:
+        lines.append(f"{row[0]}:{row[1]}")                     
+        grand_total = grand_total + row[1]
+    lines.append(f"Всего: {grand_total}")
+    bot.reply_to(message, "\n".join(lines))
+
 @bot.message_handler(content_types=["text"])
 def add_expense(message):
     parts = message.text.split()

@@ -109,3 +109,15 @@ def get_visible_partner_id(user_id):
     if partner_row[0] == user_id and partner_row[1] == 1:
         return partner_id
     return None
+
+def get_totals_for_two(user_id,partner_id):
+    connection = sqlite3.connect(DB_NAME)
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT category, SUM(amount) FROM expenses "
+        "WHERE user_id IN (?,?) GROUP BY category ORDER BY SUM(amount) DESC",
+        (user_id,partner_id),
+    )
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
