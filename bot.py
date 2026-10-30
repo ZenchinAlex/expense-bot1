@@ -7,6 +7,15 @@ import categories
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
+ALLOWED_IDS = []
+for part in os.getenv("ALLOWED_IDS").split(","):
+    ALLOWED_IDS.append(int(part))
+
+
+def is_allowed(user_id):
+    return user_id in ALLOWED_IDS
+
+
 db.init_db()
 
 bot = telebot.TeleBot(TOKEN)
@@ -14,10 +23,14 @@ bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=["start"])
 def start(message):
+    if not is_allowed(message.from_user.id):
+        return
     bot.reply_to(message, "Привет! Я бот для учёта расходов.")
 
 @bot.message_handler(commands=["list"])
 def list_expenses(message):
+    if not is_allowed(message.from_user.id):
+        return
     rows = db.get_last_expenses(message.from_user.id)
     if len(rows) == 0:
         bot.reply_to(message, "Пока нет расходов")
@@ -30,6 +43,8 @@ def list_expenses(message):
 
 @bot.message_handler(commands=["stats"])
 def stats(message):
+    if not is_allowed(message.from_user.id):
+        return
     rows = db.get_totals_by_category(message.from_user.id)
     if len(rows) == 0:
         bot.reply_to(message, "Пока нет расходов")
@@ -45,10 +60,14 @@ def stats(message):
 
 @bot.message_handler(commands=["myid"])
 def myid(message):
+    if not is_allowed(message.from_user.id):
+        return
     bot.reply_to(message, f"Твой ID: {message.from_user.id}")
 
 @bot.message_handler(commands=["partner"])
 def partner(message):
+    if not is_allowed(message.from_user.id):
+        return
     parts = message.text.split()
     if len(parts) != 2 or not parts[1].isdigit():
         bot.reply_to(message, "Напиши так: /partner ID, например: /partner 123456789")
@@ -60,6 +79,8 @@ def partner(message):
 
 @bot.message_handler(commands=["share"])
 def share(message):
+    if not is_allowed(message.from_user.id):
+        return
     parts = message.text.split()
     if len(parts) != 2 or parts[1] not in ("on", "off"):
         bot.reply_to(message, "Напиши так: /share on или /share off")
@@ -74,6 +95,8 @@ def share(message):
 
 @bot.message_handler(commands=["family"])
 def family(message):
+    if not is_allowed(message.from_user.id):
+        return
     partner_id = db.get_visible_partner_id(message.from_user.id)
     if partner_id is None:
         bot.reply_to(
@@ -98,6 +121,8 @@ def family(message):
 
 @bot.message_handler(commands=["total"])
 def total(message):
+    if not is_allowed(message.from_user.id):
+        return
     partner_id = db.get_visible_partner_id(message.from_user.id)
     if partner_id is None:
         bot.reply_to(message, "Нет доступа: партнёр не указан, не включил /share on или не добавил тебя как партнёра")
@@ -116,6 +141,8 @@ def total(message):
 
 @bot.message_handler(content_types=["text"])
 def add_expense(message):
+    if not is_allowed(message.from_user.id):
+        return
     parts = message.text.split()
     if len(parts) < 2:
         bot.reply_to(message, "Напиши так: название сумма, например: кофе 150")
