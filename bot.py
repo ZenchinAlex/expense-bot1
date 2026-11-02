@@ -72,7 +72,9 @@ def partner(message):
     if len(parts) != 2 or not parts[1].isdigit():
         bot.reply_to(message, "Напиши так: /partner ID, например: /partner 123456789")
         return
-
+    if message.from_user.id == int(parts[1]): # Я не знаю каким именно образом указать условие что ID из сообщения == ID отправителя
+        bot.reply_to(message,"Нельзя указать себя как партнера")
+        return
     db.set_partner(message.from_user.id, int(parts[1]))
     bot.reply_to(message, "Партнёр сохранён")
 
