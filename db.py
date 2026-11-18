@@ -1,6 +1,7 @@
 import sqlite3
+import os 
 
-DB_NAME = "expenses.db"
+DB_NAME = os.getenv("DB_PATH", "expenses.db")
 
 
 def init_db():
